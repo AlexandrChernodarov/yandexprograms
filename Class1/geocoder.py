@@ -5,23 +5,21 @@ API_KEY = '40d1649f-0493-4b70-98ba-98533de7710b'
 
 def geocode(address):
     # Собираем запрос для геокодера.
-    geocoder_request = f"http://geocode-maps.yandex.ru/1.x/"
-    geocoder_params = {
-        "apikey": API_KEY,
-        "geocode": address,
-        "format": "json"}
+    geocoder_request = f"http://geocode-maps.yandex.ru/1.x/?apikey={API_KEY}" \
+                       f"&geocode={address}&format=json"
 
     # Выполняем запрос.
-    response = requests.get(geocoder_request, params=geocoder_params)
+    response = requests.get(geocoder_request)
 
     if response:
         # Преобразуем ответ в json-объект
         json_response = response.json()
     else:
         raise RuntimeError(
-            f"""Ошибка выполнения запроса:
-            {geocoder_request}
-            Http статус: {response.status_code} ({response.reason})""")
+            """Ошибка выполнения запроса:
+            {request}
+            Http статус: {status} ({reason})""".format(
+                request=geocoder_request, status=response.status_code, reason=response.reason))
 
     # Получаем первый топоним из ответа геокодера.
     # Согласно описанию ответа он находится по следующему пути:
@@ -47,6 +45,7 @@ def get_ll_span(address):
     toponym = geocode(address)
     if not toponym:
         return (None, None)
+
     # Координаты центра топонима:
     toponym_coodrinates = toponym["Point"]["pos"]
     # Долгота и Широта :
@@ -75,15 +74,11 @@ def get_ll_span(address):
 # Находим ближайшие к заданной точке объекты заданного типа.
 def get_nearest_object(point, kind):
     ll = "{0},{1}".format(point[0], point[1])
-    geocoder_request = f"http://geocode-maps.yandex.ru/1.x/"
-    geocoder_params = {
-        "apikey": API_KEY,
-        "geocode": ll,
-        "format": "json"}
-    if kind:
-        geocoder_params['kind'] = kind
+    geocoder_request = f"http://geocode-maps.yandex.ru/1.x/?apikey={API_KEY}" \
+                       f"&geocode={ll}&kind={kind}&format=json"
+
     # Выполняем запрос к геокодеру, анализируем ответ.
-    response = requests.get(geocoder_request, params=geocoder_params)
+    response = requests.get(geocoder_request)
     if not response:
         raise RuntimeError(
             f"""Ошибка выполнения запроса:
@@ -96,3 +91,4 @@ def get_nearest_object(point, kind):
     # Получаем первый топоним из ответа геокодера.
     features = json_response["response"]["GeoObjectCollection"]["featureMember"]
     return features[0]["GeoObject"]["name"] if features else None
+

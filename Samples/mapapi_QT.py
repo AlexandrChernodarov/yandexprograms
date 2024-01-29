@@ -1,8 +1,9 @@
+import os
 import sys
-from io import BytesIO
 
-import requests
 from PIL import Image, ImageQt
+from io import BytesIO
+import requests
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel
 
@@ -36,6 +37,7 @@ class Example(QWidget):
         self.image.move(0, 0)
         self.image.resize(600, 450)
         self.image.setPixmap(QPixmap.fromImage(self.img))
+
 
 
 if __name__ == '__main__':
